@@ -4,7 +4,6 @@ namespace Primes
 {
 	class Program
 	{
-		//Test update
 		static void Main(string[] args)
 		{
 			for(uint i = 1; i <= 1000; i++) {
