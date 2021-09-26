@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 
 namespace Primes
 {
@@ -7,23 +8,30 @@ namespace Primes
 	{
 		static void Main(string[] args)
 		{
-			Tests.IsCorrect(Primes.EasyIsPrime, Primes.IsPrime, 1000);
-			Tests.IsCorrect(Primes.EasyIsPrime, Primes.FastIsPrime, 1000);
-			for(uint i = 1; i <= 1000; i++) {
-				if(Primes.EasyIsPrime(i)) Console.WriteLine(i);
+			uint slowCount = 1000;
+			Tests.IsCorrect(Primes.SlowIsPrime, Primes.LinqIsPrime, slowCount);
+			Tests.IsCorrect(Primes.LinqIsPrime, Primes.FastIsPrime, slowCount);
+			Tests.IsCorrect(Primes.FastIsPrime, Primes.IsPrime, slowCount);
+
+			for(uint i = 1; i <= slowCount; i++) {
+				if(Primes.FastIsPrime(i)) Console.WriteLine(i);
 			}
-			var easyResult = Tests.Benchmark(Primes.EasyIsPrime, 1000000);
+
+			const uint benchCount = 50000;
+			var easyResult = Tests.Benchmark(Primes.SlowIsPrime, benchCount);
 			Console.WriteLine("easyResult Result: " + easyResult.Milliseconds);
-			var normalResult = Tests.Benchmark(Primes.IsPrime, 1000000);
+			var normalResult = Tests.Benchmark(Primes.IsPrime, benchCount);
 			Console.WriteLine("normal Result: " + normalResult.Milliseconds);
-			var fastResult = Tests.Benchmark(Primes.FastIsPrime, 1000000);
+			var fastResult = Tests.Benchmark(Primes.FastIsPrime, benchCount);
 			Console.WriteLine("fast Result: " + fastResult.Milliseconds);
+			var oddResult = Tests.Benchmark(Primes.LinqIsPrime, benchCount);
+			Console.WriteLine("odd Result: " + oddResult.Milliseconds);
 		}
 	}
 
 	class Primes
 	{
-		public static bool EasyIsPrime(uint x)
+		public static bool SlowIsPrime(uint x)
 		{
 			if (x < 2) return false;
 			if (x == 2) return true;
@@ -55,6 +63,13 @@ namespace Primes
 				if(x % i == 0 || x % (i + 2) == 0) return false;
 			}
 			return true;
+		}
+		public static bool LinqIsPrime(uint x)
+		{
+			var xx = (int)x;
+			if(x < 2) return false;
+			return Enumerable.Range(2, xx - 2)
+				.Where(y => xx % y == 0).Count() == 0;
 		}
 	}
 	
